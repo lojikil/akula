@@ -49,6 +49,11 @@ typedef struct httpresp {
     int refc;
 } HTTPResponse;
 
+/* not really sure how much I like the below types...
+ * they make sense, sure, but they're kinda unweildy
+ * to use...
+ */
+
 typedef enum {
     WRAPPED, UNWRAPPED;
 } Wrapping;
@@ -70,6 +75,8 @@ typedef struct {
     } wrapped;
     int refc;
 } WrappedHeader;
+
+const char defaultUserAgent[] = "Akula/bot 0.0alpha";
 
 /* Don't know if we really want this:
 
@@ -103,3 +110,55 @@ int decrement_header(HTTPHeader *);
 int increment_cookie(HTTPCookie *);
 int decrement_cookie(HTTPCookie *);
 void directory_buster(char *host, char **db_paths);
+
+int
+main(int ac, char **al, char **el) {
+
+    if(ac != 3) {
+        usage();
+        return 1;
+    }
+    
+    printf("");
+    printf("        __         .__          \n");
+    printf("_____  |  | ____ __|  | _____   \n");
+    printf("\\__  \\ |  |/ /  |  \\  | \\__  \\  \n");
+    printf(" / __ \\|    <|  |  /  |__/ __ \\_\n");
+    printf("(____  /__|_ \\____/|____(____  /\n");
+    printf("     \\/     \\/               \\/ \n");
+    printf("  MIT/X licensed HTTP Fuzzer\n");
+    printf("  copyright 2015 Stefan Edwards/lojikil\n");
+    directory_buster(al[1], &al[2]);
+    return 0;
+}
+
+void
+directory_buster(char *host, char **db_paths) {
+    FILE *cur_fh = nil;
+    char *cur_url = nil, *tmp = nil;
+    int idx = 0;
+   
+    cur_url = (char *)calloc(sizeof(char), 2048);
+
+    while(db_paths[idx] != nil) {
+        cur_fh = fopen(db_paths[idx], "r");
+
+        if(!cur_fh) {
+            printf("[!] could not open database path: %s\n", db_paths[idx]);
+            continue; 
+        }
+
+        while(1) {
+            // use tmp, so as to keep a ref to cur_url for free(3)
+            tmp = fgets(cur_url, 2048, cur_fh);
+            if(!tmp || feof(cur_fh)) {
+                break;
+            }
+        }
+
+        fclose(cur_fh);
+        idx++;
+    }
+
+    free(cur_url);
+}
